@@ -27,13 +27,16 @@ canvas_result = st_canvas(
 )
 
 if canvas_result.image_data is not None:
-    img = canvas_result.image_data
-    img = cv2.cvtColor(img.astype("uint8"), cv2.COLOR_RGBA2GRAY)
-    img = cv2.resize(img, (28, 28))
-    img = img / 255.0
-    img = img.reshape(1, 28, 28, 1)
+    st.session_state["img"] = canvas_result.image_data
 
-    if st.button("🧠 Predict"):
+if st.button("🧠 Predict"):
+    if "img" in st.session_state:
+        img = st.session_state["img"]
+        img = cv2.cvtColor(img.astype("uint8"), cv2.COLOR_RGBA2GRAY)
+        img = cv2.resize(img, (28, 28))
+        img = img / 255.0
+        img = img.reshape(1, 28, 28, 1)
+
         try:
             model = load_model("mnist_model.h5")
             pred = model.predict(img)
@@ -41,6 +44,9 @@ if canvas_result.image_data is not None:
         except Exception as e:
             st.error("❌ Model not found or error during prediction.")
             st.text(str(e))
+    else:
+        st.warning("⚠️ Please draw a digit first!")
+
 
 # --- Section 2: Train Model + Show TensorBoard ---
 st.header("⚙️ Train New Model")
